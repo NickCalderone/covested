@@ -9,7 +9,7 @@ class Property(models.Model):
     purchase_price = models.DecimalField(max_digits=12, decimal_places=2)
     purchase_date = models.DateField()
     estimated_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    owners = models.ManyToManyField(settings.AUTH_USER_MODEL, through="PropertyOwner", related_name="properties")
+    owners = models.ManyToManyField(settings.AUTH_USER_MODEL, through="PropertyOwnership", related_name="properties")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -17,7 +17,7 @@ class Property(models.Model):
 
 
 # Intermediate model to represent ownership of a property by a user, along with their initial contribution and join date.
-class PropertyOwner(models.Model):
+class PropertyOwnership(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="property_ownerships")
     property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="property_owners")

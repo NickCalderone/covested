@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'api',
     'users',
     'properties',
+    'expenses',
+	'labor'
 ]
 
 MIDDLEWARE = [
