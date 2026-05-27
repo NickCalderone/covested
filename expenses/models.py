@@ -14,6 +14,7 @@ class Expense(models.Model):
 		OTHER = "other", "Other"
 
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	# properties.Property = [app][model] to avoid circular import issues
 	property = models.ForeignKey("properties.Property", on_delete=models.PROTECT, related_name="expenses")
 	paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="paid_expenses")
 	amount = models.DecimalField(max_digits=12, decimal_places=2)
