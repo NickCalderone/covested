@@ -4,4 +4,5 @@ urlpatterns = [
     path("", include("expenses.urls")),
     path("", include("labor.urls")),
     path("", include("properties.urls")),
+    path("auth/", include("users.urls")),
 ]
