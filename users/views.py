@@ -4,6 +4,40 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from users.serializers import RegisterSerializer, UserSerializer
+
+
+def token_response(user, data=None, status_code=status.HTTP_200_OK):
+    """Return the access token in the body, the refresh token in an HttpOnly cookie."""
+    refresh = RefreshToken.for_user(user)
+
+    response = Response({**(data or {}), "access": str(refresh.access_token)}, status=status_code)
+    response.set_cookie(
+        key="refresh_token",
+        value=str(refresh),
+        httponly=True,
+        secure=not settings.DEBUG,  # HTTPS only in production
+        samesite="Lax",
+        max_age=60 * 60 * 24,  # 1 day
+    )
+    return response
+
+
+class RegisterView(APIView):
+    permission_classes = []  # public endpoint, no auth required
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        # sign the new user straight in, so they don't have to log in again
+        return token_response(user, data={"user": UserSerializer(user).data}, status_code=status.HTTP_201_CREATED)
+
+
+class MeView(APIView):
+    def get(self, request):
+        return Response(UserSerializer(request.user).data)
 
 
 class LoginView(APIView):
@@ -17,19 +51,7 @@ class LoginView(APIView):
         if user is None:
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-
-        response = Response({"access": access_token})
-        response.set_cookie(
-            key="refresh_token",
-            value=str(refresh),
-            httponly=True,
-            secure=not settings.DEBUG,  # HTTPS only in production
-            samesite="Lax",
-            max_age=60 * 60 * 24,  # 1 day
-        )
-        return response
+        return token_response(user, data={"user": UserSerializer(user).data})
 
 
 class RefreshView(APIView):

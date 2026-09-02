@@ -135,6 +135,9 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # Vite dev server
 ]
 
+# the refresh token rides in an HttpOnly cookie, which browsers withhold cross-origin without this
+CORS_ALLOW_CREDENTIALS = True
+
 AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
